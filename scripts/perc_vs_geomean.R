@@ -1,7 +1,7 @@
 # This script calculates the annual seasonal geometric mean of a paramater based on a
 # reservoir identified. It only uses Apr-Oct data, <= 1 m, and stations with more
 # than a user-specified number of data (default = 5 per year). It then plots the
-# 90th percentile pH against those geoemtric means
+# 90th percentile pH against those geoemtric means.
 
 perc_vs_geomean <- function(parameter1 = "Chla", parameter2 = "pH", 
                             reservoir = "LAKE WATEREE", min_n1 = 5, min_n2 = 10,
