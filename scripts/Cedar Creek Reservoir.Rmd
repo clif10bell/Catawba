@@ -1,0 +1,187 @@
+---
+title: "Cedar Creek Reservoir Data Analysis Sections to be Inserted in Catawba Chlorophyll-a Document"
+author: "Clifton Bell"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(ggplot2)
+library(data.table)
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(httr)
+library(flextable)
+library(jsonlite)
+library(readr)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(gridExtra)
+library(patchwork)
+library(officer)
+
+data_list <- readRDS(here("data", "data_list.rds"))
+algal_taxa <- readRDS(here("data", "algal_taxa.rds"))
+
+source(here("scripts", "data_import.R"))
+source(here("scripts", "boxplots.R"))
+source(here("scripts", "time_series.R"))
+source(here("scripts", "algal_taxa.R"))
+source(here("scripts", "scatterplots.R"))
+source(here("scripts", "exceed_tables.R"))
+source(here("scripts", "data_counts.R"))
+source(here("scripts", "annual_geomeans.R"))
+source(here("scripts", "summary_stat_tables.R"))
+source(here("scripts", "perc_vs_geomean.R"))
+```
+
+## 4.2   CEDAR CREEK RESERVOIR
+
+Cedar Creek Reservoir (also known as Stumpy Pond or Rocky Creek Lake) is downstream of Fishing Creek Lake and Great Falls Reservoir and upstream of Lake Wateree. This smaller (~850 acre) was created in 1909 as part of the hydroelectric projects along the Catawba-Wateree River. Duke Energy currently operates the Cedar Creek Hydropower Station at the downstream end of the reservoir. Several islands divide Cedar Creek Reservoir into channel-like segments. No public water supply intakes are located on Cedar Creek Reservoir.
+
+### 4.2.1   Assessment History
+
+
+### 4.2.2   Chlorophyll-a Conditions
+
+There are three stations on Cedar Creek Reservoir with 10 or more data over 2000-2023, and a large number of stations with 6-9 data (Table X). The geometric mean chlorohyll-a ranged from 4.8 ug/L at the tailrace station CW-174 (just below the Dearborn Hydro Station) to 23.9 ug/L at station RL-01007 on the east side channel of the reservoir. The 90th percentile chlorophyll-a ranged (only computed for three stations with >10 data) range from 10.2 ug/L at CW-174 to 38.3 ug/L at station RL-19149 on the east side channel of the reservoir. Station CW-033 is representative of the lower mainstem and had a geometric mean chlorohphyll-a of 11.5 ug/L and a 90th percentile chlorophyll-a of 25.9 ug/L. These data indicate that chlorophyll-a is highest in the east side channel (Figure X).
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("Chla", "CEDAR CREEK RESERVOIR")
+t1 <- set_caption(t1, caption = "Table X - Chlorophyll-a Summary Statistics for Cedar Creek Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in chl-a in Cedar Creek Reservoir. Apr-Oct data <= 1 m"}
+boxplots1("Chla", "CEDAR CREEK RESERVOIR")
+```
+
+The growing season geometric mean is a candidate metric for expression of site-specific criteria. Table X shows the Apr-Oct geometric mean chlorophyll-a values for individual years and stations in Cedar Creek Reservoir, and presents values only for year-station combinations with at least 5 data. The table also presents the minimum, median, maximum, and standard deviation of the Apr-Oct geometric means for individual years.  The maximum growing season geometric mean (24.6 ug/L) occurred at east side channel station RL-19149 in 2019.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- annual_geomeans("Chla", waterbody = "CEDAR CREEK RESERVOIR", n = 5)
+
+t1 <- t1 %>%
+  set_caption(caption = "Table X - Chlorophyll-a Annual Geometric Means for Cedar Creek Reservoir, Apr-Oct data <= 1 m") %>%
+  theme_box() %>%
+  fontsize(size = 8, part = "all") %>%  # Reduced font size further
+  align(align = "center", part = "all") %>%
+  autofit() %>% width(width=0.5)
+t1
+```
+
+Time series plots (Figure X) show interannual variability in chlorophyll-a in Cedar Creek Reservoir since 2000, but no obvious long-term trends. Seasonal plots show a clar seasonal pattern in the mainstem chlorophyll-a (Figure X), with values peaking in July and August. At the station with the highest chlorophyll-a (CW-208), chlorophyll-a tended to be higher in August-October than May-July. But this was not the case at other Cedar Creek Reservoir stations.
+
+```{r, echo=FALSE, fig.cap="Figure X - Chl-a over time at Cedar Creek Reservoir stations. Data <= 1 m"}
+time_series("Chla", c("CW-174", "CW-033"))  
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in chl-a at Cedar Creek Reservoir stations. Data < 1 m"}
+boxplots2("Chla", c("CW-174", "CW-033"), max_scale = 40)   
+```
+
+### 4.2.3   Water Quality Indicators
+
+Apart from chlorophyll-a, other important water quality indicators include dissolved oxygen (DO), pH, water clarity,
+and cyanotoxins. Exceedances of related criteria or thresholds might or might not be related to eutrophication or high chlorophyll-a values. However, these water quality indicators provide insights into the overall use status of a reservoir, and relations of these indicators with chlorophyll-a (or lack thereof) can inform site-specific chlorophyll-a criteria.
+
+#### 4.2.3.1    Dissolved Oxygen
+
+The applicable DO water quality criteria for Cedar Creek Reservoir include a daily average not less than 5.0 mg/L with a low of 4.0 mg/L. For water quality assessment purposes, measurements are made at the surface. Most stations inn Cedar Creek Reservoir had all surface DO measurements above 5 mg/L. Three stations (CW-174, CL-175, RL-01007) had DO minima less than 4.0 mg/L and a DO 10th percentile less than 5.0 mg/L. Stations CW-174 and CW-175 might both be occasionally affected by low DO water released from the Dearborn Hydro Station. Station RL-01007 is in the east side channel, but other stations in the east side channel did not have the lower DO concentrations observed at this station. Station RL-06431 in a central side channel had the lowest median DO, albeit based on only 7 samples.  A plot of DO vs depth (Figure X) indicates little DO stratification in this relatively shallow reservoir.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("DO", "CEDAR CREEK RESERVOIR")
+t1 <- set_caption(t1, caption = "Table X - Dissolved Oxygen Summary Statistics for Cedar Creek Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Dissolved Oxygen v Depth at Selected Cedar Creek Reservoir stations."}
+scatter2(station_list = c("CW-033"))
+```
+
+A plot of DO vs chlorophyll-a (Figure X) indicates a positive relation between the two parameters. The plot also shows that the relation between DO and chlorophyll-a is not strong at all individual stations, so the overall relation may be driven more by spatial patterns in DO and chlorophyll-a than temporal variations in photosynthesis. Box and whisker plots of the longitudinal DO pattern (Figure X) do not show a marked spatial pattern or consistent difference between different station location categories. 
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Dissolved Oxygen v Chlorophyll-a at Selected Cedar Creek Reservoir stations."}
+scatter1("Chla", "DO", c("CW-174", "RL-19149", "RL-01007", "RL-02319", "CW-033"), regression = "linear")
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in DO in Cedar Creek Reservoir. Apr-Oct data <= 1 m"}
+boxplots1("DO", "CEDAR CREEK RESERVOIR", min_scale = 0, max_scale = 15)
+```
+
+#### 4.2.3.2    pH
+
+The applicable water quality criterion for pH for SC freshwaters is a range between 6.0 and 8.5. The maximum pH values at many Cedar Creek Reservoir stations were higher than 8.5, but median values were all within the criteria range (Table X). Considering the six stations with more than 10 surface pH measurements, none had a 90th percentile pH higher than 8.5. pH had a generally positive relation with chlorophyll-a albeit with a great deal of scatter, and the highest (>35 ug/L) chlorophyll-a values were not associated with very high pH values (Figure X).
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("pH", "CEDAR CREEK RESERVOIR")
+t1 <- set_caption(t1, caption = "Table X - pH Summary Statistics for Cedar Creek Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - pH v Chlorophyll-a at Selected Cedar Creek Reservoir stations."}
+scatter1("Chla", "pH", c("CW-174", "RL-19149", "RL-01007", "RL-02319", "CW-033"), regression = "linear")
+```
+
+#### 4.2.3.3    Water Clarity
+
+Water clarity in reservoirs is typically measured by Secchi depth. South Carolina does not have a recreationally-based criterion for Secchi depth. The median Secchi depth was between 0.5 and 1.0 m at most Cedar Creek Reservoir stations (Figure X), with the highest Secchi depth at lake arm station RL-18-146 and the lowest Secchi depth at stations RL-02319. CW-033 is the mainstem station with the longest period of record for Secchi depth, and had a median value of 0.7 m.
+
+There was no strong relation between Secchi depth and chlorophyll-a (R2 = 0.04) (Figure X). Secchi depth had a much stronger (inverse) relations with turbidity (Figure X) than with chlorophyll-a. Secchi depth was usually less than 0.5 m when turbidity exceeded 20 NTU.  There were insufficient TSS data from Cedar creek Reservoir to determine the relation between chlorophyll-a and TSS.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("Secchi", "CEDAR CREEK RESERVOIR")
+t1 <- set_caption(t1, caption = "Table X - Secchi Depth Summary Statistics for Cedar Creek Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in Secchi depth in Cedar Creek Reservoir."}
+boxplots1("Secchi", "CEDAR CREEK RESERVOIR", max_scale = 2)
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Secchi depth v Chlorophyll-a at Cedar Creek Reservoir stations.", message = FALSE, warning = FALSE}
+scatter1("Chla", "Secchi", c("CW-174", "RL-19149", "RL-01007", "RL-02319", "CW-033"), regression = "linear")
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Secchi depth v Turbidity at Selected Cedar Creek Reservoir stations.", message = FALSE, warning = FALSE}
+scatter1("Turbidity", "Secchi", c("CW-174", "RL-19149", "RL-01007", "RL-02319", "CW-033"), regression = "none")
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Secchi depth v TSS at Cedar Creek Reservoir stations.", message = FALSE, warning = FALSE}
+scatter1("TSS", "Secchi", c("CW-174", "RL-19149", "RL-01007", "RL-02319", "CW-033"), regression = "exponential")
+```
+
+#### 4.2.3.4    Cyanotoxins
+
+SCDES has  monitored microcystin at two Cedar Creek Reservoir reservoir stations since 2018. No samples have exceeded the SC recreational water quality criterion of 8.0 ug/L nor any drinking water based threshold (Table X). The SCDES database of complaint driven cyanotoxin monitoring had no entries for Cedar Creek Reservoir.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("Microcystin", "CEDAR CREEK RESERVOIR")
+t1 <- set_caption(t1, caption = "Table X - Microcystin Summary Statistics for CEDAR CREEK RESERVOIR")
+t1
+```
+
+
+#### 4.2.3.5    Other Algal Indicators
+
+The database provided to the project team included no algal taxonomy data for Cedar Creek reservoir.
+
+## 4.3 Other Status Indicators   
+
+The previous section explored water quality indicators and their relation with chlorophyll-a. Some indicators are less quantitative but still informative regarding the use status of the reservoir. This subsection discusses three such indicators: fishery quality, potable water supply, and aesthetics. 
+
+## 4.3.1    Fishery Quality
+
+## 4.3.2    Potable Water Supply
+
+Cedar Creek has no public water supply intakes, so there is no record of taste and odor or other water treatability issues for this reservoir.
+
+## 4.3.3    Reports of Algal Blooms 
+
+In addition to routine monitoring for microcystin, SCDES performs sampling associated with algal bloom complaints. The SCDES database of complaint driven cyanotoxin monitoring had no entries for Cedar Creek Reservoir.

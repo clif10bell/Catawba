@@ -1,0 +1,259 @@
+---
+title: "Lake Wateree Data Analysis Sections to be Inserted in Catawba Chlorophyll-a Document"
+author: "Clifton Bell"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(ggplot2)
+library(data.table)
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(httr)
+library(flextable)
+library(jsonlite)
+library(readr)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(gridExtra)
+library(patchwork)
+library(officer)
+
+data_list <- readRDS(here("data", "data_list.rds"))
+algal_taxa <- readRDS(here("data", "algal_taxa.rds"))
+
+source(here("scripts", "data_import.R"))
+source(here("scripts", "boxplots.R"))
+source(here("scripts", "time_series.R"))
+source(here("scripts", "algal_taxa.R"))
+source(here("scripts", "scatterplots.R"))
+source(here("scripts", "exceed_tables.R"))
+source(here("scripts", "data_counts.R"))
+source(here("scripts", "annual_geomeans.R"))
+source(here("scripts", "summary_stat_tables.R"))
+source(here("scripts", "perc_vs_geomean.R"))
+```
+
+## 4.2   LAKE WATEREE
+
+Lake Wateree, located in Kershaw, Fairfield, and Lancaster Counties, is a man-made reservoir created in 1919 with the construction of Wateree Dam on the Wateree River. Covering approximately 13,700 acres, the reservoir is a popular destination for boating, fishing, and other recreational activities. The Wateree Dam, operated by Duke Energy, plays a important role in hydroelectric power generation and water management for the surrounding area. Two public water purveyors operate intakes on Lake Wateree. The City of Camden withdraws and treats water to serve approximately 6,900 customers with an average of 2.5 MGD and a treatment capacity of 6 MGD. The Lugoff-Elgin Water Authority serves over 7,300 customers in Kershaw, Fairfield and Richland Counties. The water is treated at 6 MGD water treatment plant near the Wateree Dam.
+
+### 4.2.1   Assessment History
+
+
+### 4.2.2   Chlorophyll-a Conditions
+
+There are nine stations on Lake Wateree with 10 or more data over 2000-2023 for computing summary statistics (Table X). Considering only these stations, the long-term growing season geometric mean chlorophyll-a varied from 4.9 ug/L at station CW-231 (a headwater station)  to 31 ug/L at stations CW-208 (a lake arm station). Station RL-19166 had the highest geoemtric mean chlorophyll-a, but that was based on only 5 data. The 90th percentile chlorophyll-a values varied from 10.2 ug/L at station CW-231 to 45.5 ug/L at station CW-208. Box-and whisker plots of stations with at least 5 data (Figure X) indicate that chlorophyll-a increases from the headwater through the upper lake, peaks at the lake arms stations in the upper reservoir, and thereafter levels off or decreases slight through the mid and lower reservoir.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("Chla", "LAKE WATEREE")
+t1 <- set_caption(t1, caption = "Table X - Chlorophyll-a Summary Statistics for Lake Wateree, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in chl-a in Lake Wateree. Apr-Oct data <= 1 m"}
+boxplots1("Chla", "LAKE WATEREE")
+```
+
+The growing season geometric mean is a candidate metric for expression of site-specific criteria. Table X shows the Apr-Oct geometric mean chlorophyll-a values for individual years and stations in Lake Wateree, and presents values only for year-station combinations with at least 5 data. The table also presents the minimum, median, maximum, and standard deviation of the Apr-Oct geometric means for individual years.  The maximum growing season geometric mean (36.8 ug/L) occurred at station CW-208 in 2002.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- annual_geomeans("Chla", waterbody = "LAKE WATEREE", n = 5)
+
+t1 <- t1 %>%
+  set_caption(caption = "Table X - Chlorophyll-a Annual Geometric Means for Lake Wateree, Apr-Oct data <= 1 m") %>%
+  theme_box() %>%
+  fontsize(size = 8, part = "all") %>%  # Reduced font size further
+  align(align = "center", part = "all") %>%
+  autofit() %>% width(width=0.5)
+t1
+```
+
+Time series plots (Figure X) do not show marked trends in chlorophyll-a in Lake Wateree since 2000. Seasonal plots do not show a strong seasonal pattern in chlorophyll-a (Figure X). At the station with the highest chlorophyll-a (CW-208), chlorophyll-a tended to be higherin August-October than May-July. But this was not the case at other Lake Wateree stations.
+
+```{r, echo=FALSE, fig.cap="Figure X - Chl-a over time at Lake Wateree stations. Data <= 1 m"}
+time_series("Chla", c("CL-089", "CW-207", "CW-231"))  
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in chl-a at Lake Wateree stations. Data < 1 m"}
+boxplots2("Chla", c("CL-089", "CW-207B", "CW-207", "CW-208", "LCR-02", "CW-231"))   
+```
+
+### 4.2.3   Water Quality Indicators
+
+Apart from chlorophyll-a, other important water quality indicators include dissolved oxygen (DO), pH, water clarity,
+and cyanotoxins. Exceedances of related criteria or thresholds might or might not be related to eutrophication or high chlorophyll-a values. However, these water quality indicators provide insights into the overall use status of a reservoir, and relations of these indicators with chlorophyll-a (or lack thereof) can inform site-specific chlorophyll-a criteria.
+
+#### 4.2.3.1    Dissolved Oxygen
+
+The applicable DO water quality criteria for Lake Wateree include a daily average not less than 5.0 mg/L with a low of 4.0 mg/L. For water quality assessment purposes, measurements are made at the surface. The only station that had a minimum DO of less than 4.0 mg/L was stations CL-089 in the lower reservoir (Table X). This station was also the only station with 10 or more data that had a 10th percentile DO less than 5 mg/L. Hence, it appears that most of Lake Wateree has adequate surface DO but that a region in the lower reservoir can sometime experience lower surface DO concentrations. A plot of DO vs depth (Figure X) indicates that DO decreases with depth as in most deep, stratified reservoirs.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("DO", "LAKE WATEREE")
+t1 <- set_caption(t1, caption = "Table X - Dissolved Oxygen Summary Statistics for Lake Wateree, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Dissolved Oxygen v Depth at Selected Lake Wateree stations."}
+scatter2(station_list = c("CL-089", "CW-207B", "CW-207", "CW-208", "LCR-02", "CW-231"))
+```
+
+A plot of DO vs chlorophyll-a (Figure X) indicates a positive relation between the two parameters. The plot also shows that the relation between DO and chlorophyll-a is not strong at all individual stations, so the overall relation may be driven more by spatial patterns in DO and chlorophyll-a than temporal variations in photosynthesis. Box and whisker plots of the longitudinal DO pattern (Figure X) confirm that upper and lower reservoir have somewhat lower DO than the middle reservoir station, and that DO values less than 5 mg/L are uncommon. The driver(s) of the occasional low DO values at station CL-089 are uncertain. One possibility is the upwelling of deeper water caused be destratification or a hydraulic effect related to dam operation.
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Dissolved Oxygen v Chlorophyll-a at Selected Lake Wateree stations."}
+scatter1("Chla", "DO", c("CL-089", "CW-207B", "CW-207", "CW-208", "LCR-02", "CW-231"), regression = "linear")
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in DO in Lake Wateree. Apr-Oct data <= 1 m"}
+boxplots1("DO", "LAKE WATEREE", min_scale = 0, max_scale = 15)
+```
+
+#### 4.2.3.2    pH
+
+The applicable water quality criterion for pH for SC freshwaters is a range between 6.0 and 8.5. Many stations on Lake Wateree reservoir have 90th percentile pH values that exceed the upper limit of this range (Table X), and some exceed 9.0. A scatterplot of pH vs chlorophyll-a (Figure X) demonstrate a great deal of variance but a positive relation between the parameters. A significant proportion of samples exceeded pH of 8.5 at chlorophyll-a values of 16 ug/L and higher.  
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("pH", "LAKE WATEREE")
+t1 <- set_caption(t1, caption = "Table X - pH Summary Statistics for Lake Wateree, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - pH v Chlorophyll-a at Selected Lake Wateree stations."}
+scatter1("Chla", "pH", c("CL-089", "CW-207B", "CW-207", "CW-208", "LCR-02", "CW-231"), regression = "linear")
+```
+
+There are relatively few station-year combinations that have sufficient data (>= 10) to calculate a 90th percentile pH. Those that are available demonstrate that the seasonal (Apr-Oct)  90th percentile pH had a positive relation with the seasonal geometric mean chlorophyll-a concentration as expected (Figure X). No stations had a 90th percentile pH greater than 9.5. Based on the overall trend, the seasonal 90th percentile pH was less than 9.0 when the seasonal geometric mean chlorophyll-a was less than about 18 ug/L. But station CL-089 in the the lower reservoir had a 90th pH higher than 9.0 even in years with seasonal geometric mean chlorophyll-a concentrations of 12 - 17 ug/L.
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Seasonal 90th percentile pH v seasonal geoemetric mean chlorophyll-a at Lake Wateree stations."}
+perc_vs_geomean(parameter1 = "Chla", parameter2 = "pH", reservoir = "LAKE WATEREE", min_n1 = 5, min_n2 = 10, regression = "linear")
+```
+
+The spatial pattern of pH in Lake Wateree indicates increasing values from the headwater through the upper reservoir, and the highest valures in the upper and mid-reservoir sections (Figure X).
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in pH in Lake Wateree. Apr-Oct data <= 1 m"}
+boxplots1("pH", "LAKE WATEREE", min_scale = 5, max_scale = 10)
+```
+
+The South Carolina upper pH limit of 8.5 is more stringent than the USEPA criterion of 9.0. The USEPA upper limit was primarily derived for salmonid protection, and most warmwater fish species do not experience adverse effects at pH values less than 9.5 or higher (reference). Hence, the pH exceedances in Lake Wateree are not necessarily associated with aquatic life or fishery impacts.
+
+#### 4.2.3.3    Water Clarity
+
+Water clarity in reservoirs is typically measured by Secchi depth. South Carolina does not have a recreationally-based criterion for Secchi depth. As discussed in section X, a Secchi depth of <= 1 m has sometimes been cited in reservoir management literature as threshold for recreational users that are accustomed to clear water. The median Secchi depth is between 0.5 and 0.75 m at most upper and middle Lake Wateree stations (Figure X), increasing to between 0.75 and 1.0 m in the lower reservoir. There was no strong relation between Secchi depth and chlorophyll-a (R2 = 0.02) (Figure X). Secchi depth value greater than 1.0 m were mostly restricted to chlorophyll-a values less than 30 ug/L, but the typical Secchi depth values were less than 1.0 m even at very low chlorophyll-a values. Secchi depth had stronger (inverse) relations with turbidity (Figure X) and total suspended solids (TSS) (Figure X). 
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in Secchi depth in Lake Wateree."}
+boxplots1("Secchi", "LAKE WATEREE", max_scale = 2)
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Secchi depth v Chlorophyll-a at Lake Wateree stations.", message = FALSE, warning = FALSE}
+scatter1("Chla", "Secchi", c("CL-089", "CW-207B", "CW-207", "CW-208", "LCR-02", "CW-231"), regression = "linear")
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Secchi depth v Turbidity at Lake Wateree stations.", message = FALSE, warning = FALSE}
+scatter1("Turbidity", "Secchi", c("CL-089", "CW-207B", "CW-207", "CW-208", "LCR-02", "CW-231"), regression = "none")
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Secchi depth v TSS at Lake Wateree stations.", message = FALSE, warning = FALSE}
+scatter1("TSS", "Secchi", c("CL-089", "CW-207B", "CW-207", "CW-208", "LCR-02", "CW-231"), regression = "exponential")
+```
+
+#### 4.2.3.4    Cyanotoxins
+
+SCDES has routinely monitored microcystin at several Lake Wateree reservoir stations since 2018. No samples have exceeded the SC recreational water quality criterion of 8.0 ug/L (Table X). The single highest value detected in routine monitoring was 0.6 ug/L, and the great majority of result have been below the detection or less than 0.1 ug/L. Microcystin concentrations have been somewhat higher in samples taken based on complaints of algal blooms (Table X), with a maximum value of 4.45 ug/L measured in the lower reservoir in June 2019. 
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("Microcystin", "LAKE WATEREE")
+t1 <- set_caption(t1, caption = "Table X - Microcystin Summary Statistics for LAKE WATEREE")
+t1
+```
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- complaint
+t1 <- set_caption(t1, caption = "Table X - Results of Complaint-Driven Cyanotoxin Sampling in Lake Wateree")
+t1
+```
+
+#### 4.2.3.5    Other Algal Indicators
+
+SCDES has monitored algal taxa at two stations on Lake Wateree:
+
+* CW-207A, mid reservoir
+* CL-089, near dam
+
+Both were sampled sampled five times in 2017 between late June and mid October. Algal taxa were identified to the genus level and also categorized by major algal group (diatoms, green algae, cyanobacteria, etc.). Algae were quantified with regard to density (cells per mL) and biovolume (um3 per mL).
+
+Cyanobacteria dominated the cell counts at both Lake Wateree stations in 2017.The algal biovolume breakdown showed significant proportions of cyanobacteria, green algae, and diatoms. Cyanobacteria were the majority biovolume group in many samples including all fall samples at the mid-reservoir station.
+
+```{r, echo=FALSE, results = "asis", message = FALSE, warning = FALSE}
+count_plot_207 <- stacked_algae(station_id = "CW-207A", metric = "count", start_date = "2017-06-01", end_date = "2017-10-31") 
+biovolume_plot_207 <- stacked_algae(station_id = "CW-207A", metric = "biovolume", start_date = "2017-06-01", end_date = "2017-10-31")
+chla_plot_207 <- plot_chla("CW-207A", start_date = "2017-06-01", end_date = "2017-10-31")
+combined_207_count <- (chla_plot_207 / count_plot_207) 
+combined_207_biovol <- (chla_plot_207 / biovolume_plot_207) 
+
+count_plot_89 <- stacked_algae(station_id = "CL-089", metric = "count", start_date = "2017-06-01", end_date = "2017-10-31") 
+biovolume_plot_89 <- stacked_algae(station_id = "CL-089", metric = "biovolume", start_date = "2017-06-01", end_date = "2017-10-31")
+chla_plot_89 <- plot_chla("CL-089", start_date = "2017-06-01", end_date = "2017-10-31")
+combined_89_count <- (chla_plot_89 / count_plot_89) 
+combined_89_biovol <- (chla_plot_89 / biovolume_plot_89) 
+
+print_with_caption(combined_207_count, "Figure X: CW-207A (Lake Wateree) Chlorophyll-a and Algae Density")
+print_with_caption(combined_207_biovol, "Figure X: CW-207A  (Lake Wateree) Chlorophyll-a and Algae Biovolume")
+print_with_caption(combined_89_count, "Figure X: CW-089  (Lake Wateree) Chlorophyll-a and Algae Density")
+print_with_caption(combined_89_biovol, "Figure X: CW-089  (Lake Wateree) Chlorophyll-a and Algae Biovolume")
+```
+
+A strong relationship between chlorophyll-a and cyanobacterial cell counts was not apparent from the relatively few data available (Figure X). No samples exceed the WHO high risk threshold for cyanobacteria density (100,000 counts/mL), although some exceeded the threshold of moderate risk (20,000 cells/mL) These thresholds are indirect measures of the potential for cyanotoxin impacts. The low concentrations of microcystin in Lake Wateree (as discussed ion section x.x.x.x) indicates the WHO thresholds may not be useful risk thresholds for this water body. 
+
+```{r LW_version, echo=FALSE, results = "asis", message = FALSE, warning = FALSE, fig.cap = "Figure X: Cyanobacteria count vs. chla, Lake Wateree"}
+chla_mean <- data_list$Chla %>%
+  filter(Waterbody == "LAKE WATEREE", Depth_m <= 1) %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(mean_Chla = mean(Chla, na.rm = TRUE)) %>%
+  ungroup()
+
+algal_summarized <- algal_taxa %>%
+  filter(Waterbody == "LAKE WATEREE", Algal_Group == "Cyanobacteria") %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(total_Cells = sum(Cells, na.rm = TRUE)) %>%
+  ungroup()
+
+merged_data <- inner_join(chla_mean, algal_summarized, 
+                          by = c("StationID", "ActivityStartDate"))
+
+ggplot(merged_data, aes(x = mean_Chla, y = total_Cells, color = StationID)) +
+  geom_point() +
+  geom_hline(yintercept = 20000, linetype = "dashed", color = "blue") +
+  geom_hline(yintercept = 100000, linetype = "dashed", color = "blue") +
+  annotate("text", x = max(merged_data$mean_Chla), y = 20000, 
+           label = "WHO moderate risk threshold", hjust = 1, vjust = -0.5, color = "blue") +
+  annotate("text", x = max(merged_data$mean_Chla), y = 100000, 
+           label = "WHO high risk treshold", hjust = 1, vjust = -0.5, color = "blue") +
+  labs(x = "Mean Chlorophyll-a", y = "Total Cyanobacteria Cells per mL",
+       title = "Total Cyanobacteria Cells vs Mean Chlorophyll-a in Lake Wateree",
+       color = "Station ID") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma, limits = c(0, 120000))
+```
+
+## 4.3 Other Status Indicators   
+
+The previous section explored water quality indicators and their relation with chlorophyll-a. Some indicators are less quantitative but still informative regarding the use status of the reservoir. This subsection discusses three such indicators: fishery quality, potable water supply, and aesthetics. 
+
+## 4.3.1    Fishery Quality
+
+## 4.3.2    Potable Water Supply
+
+The Town of Camden's water intake is located in the lower part of Lake Wateree. PLACEHOLDER
+
+The Lugoff-Elgin Water Authority's water intake is also located near the Lake Wateree Dam. The water authority increases water treatment (specifically, the addition of powdered activated carbon) on a seasonal basis to reduce taste and odor in the finished water. The need for increased treatment is correlated to temperature, and usually starts around May. Engineering staff report that the T&O issues can be readily addressed by treatment as long as the seasonal pattern is anticipated and treatment starts before it become a problem (pers. comm., Tyler Lind, Asst. Superintendent, 8 July 2024). If T&O issue is allowed to develop, it can take some time to flush the affected water from the distribution system. The water authority reports no other specific issues related to algae in Lake Wateree. 
+
+## 4.3.3    Reports of Algal Blooms 
+
+In addition to routine monitoring for microcystin, SCDES performs sampling associated with algal bloom complaints. The associated database includes five such sampling events for Lake Wateree (Table X) between 2019 and 2022. Blooming species were cited as Lyngbya wollei, Trichormus sp., and Phormidium sp. Shallow coves of Lake Wateree have been known to host noticeable mats of Lyngbya wollei (or Microseira wollei) since about 2012. 

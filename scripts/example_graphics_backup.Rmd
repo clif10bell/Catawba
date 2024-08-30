@@ -1,0 +1,454 @@
+---
+title: "Graphic and Table Examples"
+author: "Clifton Bell"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(ggplot2)
+library(data.table)
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(httr)
+library(jsonlite)
+library(readr)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(gridExtra)
+library(patchwork)
+library(flextable)
+
+data_list <- readRDS(here("data", "data_list.rds"))
+algal_taxa <- readRDS(here("data", "algal_taxa.rds"))
+
+source(here("scripts", "data_import.R"))
+source(here("scripts", "boxplots.R"))
+source(here("scripts", "time_series.R"))
+source(here("scripts", "algal_taxa.R"))
+source(here("scripts", "scatterplots.R"))
+source(here("scripts", "exceed_tables.R"))
+source(here("scripts", "summary_stat_tables.R"))
+```
+
+This file contains examples of graphics and tables to support the Catawba River
+reservoir water quality evaluation. I'm sharing to give Tom and Bill a flavor
+of what we have to work with, which is quite a bit actually. Formatting of these
+plots can be adjusted as needed, and stations and parameters can easily be 
+swapped out.
+
+I have not written any interpretation yet although a few things do pop out.
+Overall I conclude that Lake Wateree shows the most signals of potential
+eutrophication-related use impacts such as high pH, high cyanobacteria, T&O in
+drinking water, etc. Upon coming back from vacation I plan on starting to write
+interpretative report sections around these plots.
+
+## Chlorophyll-a Boxplots
+
+These plots help characterize the existing chla conditions in the reservoirs.
+They only use growing season data from the upper meter of the water column. Only
+stations with 5 or more data are used. The stations are plotted from upstream
+to downstream.
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in chl-a in Fishing Creek Reservoir."}
+boxplots1("Chla", "FISHING CREEK RESERVOIR")
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Chl-a in Great Falls Reservoir."}
+boxplots1("Chla", "GREAT FALLS RESERVOIR")
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in chl-a in Cedar Creek Reservoir."}
+boxplots1("Chla", "CEDAR CREEK RESERVOIR")
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in chl-a in Lake Wateree."}
+boxplots1("Chla", "LAKE WATEREE")
+```
+
+## Chlorophyll Time Series Plots
+
+These plots would be used to infer trends in chla. Major trends are not apparent
+in the charts. If there is more interest in trends we could perform a seasonal
+Kendall trend test on selected stations.
+
+```{r, echo=FALSE, fig.cap="Figure X - Chl-a over time at Fishing Creek Reservoir stations."}
+time_series("Chla", c("CW-016F", "CW-057"))  #Fishing Creek Res.
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Chl-a over time at Fishing Creek Reservoir stations."}
+time_series("Chla", c("CW-174", "CW-033"))  #Cedar Creek Res.
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Chl-a over time at Fishing Creek Reservoir stations."}
+time_series("Chla", c("CW-231", "CW-208", "CL-089"))  #Lake Wateree
+```
+
+## Seasonal Plots for Chlorophyll-a, DO, and pH
+
+These plots display the seasonal pattern in chlorophyll-a, DO, and pH. They only use growing
+season data from the upper meter of the water column. Only stations with 5 or
+more data are used.
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in chl-a at Fishing Creek Reservoir stations."}
+boxplots2("Chla", c("CW-016F", "LCR-04", "CW-057"))   # Fishing Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in chl-a at Cedar Creek Reservoir stations."}
+boxplots2("Chla", c("CW-174", "CW-033"))              # Cedar Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in chl-a at Lake Wateree Reservoir stations."}
+boxplots2("Chla", c("CW-231", "CW-208", "CW-207B", "CL-089"))   # Lake Wateree Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in DO at Fishing Creek Reservoir stations."}
+boxplots2("DO", c("CW-016F", "LCR-04", "CW-057"), max_scale = 20)   # Fishing Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in DO at Cedar Creek Reservoir stations."}
+boxplots2("DO", c("CW-174", "CW-033"), max_scale = 20)              # Cedar Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in DO at Lake Wateree Reservoir stations."}
+boxplots2("DO", c("CW-231", "CW-208", "CW-207B", "CL-089"), max_scale = 20)   # Lake Wateree Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in pH at Fishing Creek Reservoir stations."}
+boxplots2("pH", c("CW-016F", "LCR-04", "CW-057"), min_scale = 5, max_scale = 10)   # Fishing Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in pH at Cedar Creek Reservoir stations."}
+boxplots2("pH", c("CW-174", "CW-033"), min_scale = 5, max_scale = 10)              # Cedar Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Seasonal pattern in pH at Lake Wateree stations."}
+boxplots2("pH", c("CW-231", "CW-208", "CW-207B", "CL-089"), min_scale = 5, max_scale = 10)   # Lake Wateree Stations
+```
+
+## Summary Tables for Chlorophyll-a, DO, and pH
+
+The following tables present summary statistics for chla, DO, and pH by reservoir
+and station. The stats are calculated from data from the growing season,
+<= 1 m depth, and stations with at least five data.
+
+```{r, echo = FALSE, results='asis'}
+summary_table("Chla", "FISHING CREEK RESERVOIR")
+summary_table("Chla", "GREAT FALLS RESERVOIR")
+summary_table("Chla", "CEDAR CREEK RESERVOIR")
+summary_table("Chla", "LAKE WATEREE")
+
+summary_table("DO", "FISHING CREEK RESERVOIR")
+summary_table("DO", "GREAT FALLS RESERVOIR")
+summary_table("DO", "CEDAR CREEK RESERVOIR")
+summary_table("DO", "LAKE WATEREE")
+
+summary_table("pH", "FISHING CREEK RESERVOIR")
+summary_table("pH", "GREAT FALLS RESERVOIR")
+summary_table("pH", "CEDAR CREEK RESERVOIR")
+summary_table("pH", "LAKE WATEREE")
+```
+
+## Scatterplots of DO, pH, and Secchi depth vs Chlorophyll-a
+
+The following plots help explore the relation between DO and pH and chlorophyll-a.
+The regression lines can be turned off. The plots only use data <= 1 m.
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs chla at Fishing Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "DO", c("CW-016F", "LCR-04", "CW-057"), regression = TRUE)   # Fishing Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs chla at Great Falls Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "DO", c("RL-05414", "RL-08062", "RL-06429"), regression = TRUE)   # Great Falls Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs chla at Cedar Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "DO", c("CW-174", "CW-033"),  regression = TRUE)              # Cedar Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs chla at Lake Wateree Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "DO", c("CW-231", "CW-208", "CW-207B", "CL-089"),  regression = TRUE)   # Lake Wateree Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - pH vs chla at Fishing Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "pH", c("CW-016F", "LCR-04", "CW-057"), regression = TRUE)   # Fishing Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - pH vs chla at Great Falls Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "pH", c("RL-05414", "RL-08062", "RL-06429"), regression = TRUE)   # Great Falls Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - pH vs chla at Cedar Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "pH", c("CW-174", "CW-033"),  regression = TRUE)              # Cedar Creek Res. Stations
+```
+```{r, echo=FALSE, fig.cap="Figure X - pH vs chla at Lake Wateree Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Chla", "pH", c("CW-231", "CW-208", "CW-207B", "CL-089"),  regression = TRUE)   # Lake Wateree Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Secchi depth vs chla at Fishing Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Secchi", "pH", c("CW-016F", "LCR-04", "CW-057"), regression = TRUE)   # Fishing Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Secchi depth vs chla at Cedar Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Secchi", "pH", c("CW-174", "CW-033"),  regression = TRUE)              # Cedar Creek Res. Stations
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Secchi depth vs chla at Lake Wateree Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter1("Secchi", "pH", c("CW-231", "CW-208", "CW-207B", "CL-089"),  regression = TRUE)   # Lake Wateree Stations
+```
+
+
+## Scatterplots of DO vs Depth
+
+Our report might not say anything about DO at depth, but these plots provide some
+information on that topic.
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs depth at Fishing Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter2(station_list = c("CW-016F", "LCR-04", "CW-057"))
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs depth at Great Falls Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter2(station_list = c("RL-05414", "RL-08062", "RL-06429"))
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs depth at Cedar Creek Reservoir stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter2(station_list = c("CW-174", "CW-033"))
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - DO vs depth at Lake Wateree stations.", results = "asis", message = FALSE, warning = FALSE}
+scatter2(station_list = c("CW-231", "CW-208", "CW-207B", "CL-089"))
+```
+
+## DO and pH Exceedance Tables
+
+These tables are intended to help interpret if the stations/reservoirs have
+excessive DO (<5) or pH (> 8.5) violations. They only use data <= 1 m depth and
+stations with at least five data. 
+
+
+```{r, echo = FALSE, results='asis'}
+below_table(param = "DO", threshold = 5, reservoir = "FISHING CREEK RESERVOIR")
+below_table(param = "DO", threshold = 5, reservoir = "GREAT FALLS RESERVOIR")
+below_table(param = "DO", threshold = 5, reservoir = "CEDAR CREEK RESERVOIR")
+below_table(param = "DO", threshold = 5, reservoir = "LAKE WATEREE")
+
+above_table(param = "pH", threshold = 8.5, reservoir = "FISHING CREEK RESERVOIR")
+above_table(param = "pH", threshold = 8.5, reservoir = "GREAT FALLS RESERVOIR")
+above_table(param = "pH", threshold = 8.5, reservoir = "CEDAR CREEK RESERVOIR")
+above_table(param = "pH", threshold = 8.5, reservoir = "LAKE WATEREE")
+```
+
+## Algal Taxonomy Charts
+
+These charts display both algal count and biovolume by major algal group. Chlorophyll-a
+(<= 1 m) is displayed for comparison. All data were collected in 2017.
+
+```{r, echo=FALSE, results = "asis", message = FALSE, warning = FALSE}
+count_plot_16F <- stacked_algae(station_id = "CW-016F", metric = "count", start_date = "2017-06-01", end_date = "2017-10-31") 
+biovolume_plot_16F <- stacked_algae(station_id = "CW-016F", metric = "biovolume", start_date = "2017-06-01", end_date = "2017-10-31")
+chla_plot_16F <- plot_chla("CW-016F", start_date = "2017-06-01", end_date = "2017-10-31")
+combined_16F_count <- (chla_plot_16F / count_plot_16F) 
+combined_16F_biovol <- (chla_plot_16F / biovolume_plot_16F) 
+count_plot_57 <- stacked_algae(station_id = "CW-057", metric = "count", start_date = "2017-06-01", end_date = "2017-10-31") 
+
+biovolume_plot_57 <- stacked_algae(station_id = "CW-057", metric = "biovolume", start_date = "2017-06-01", end_date = "2017-10-31")
+chla_plot_57 <- plot_chla("CW-057", start_date = "2017-06-01", end_date = "2017-10-31")
+combined_57_count <- (chla_plot_57 / count_plot_57) 
+combined_57_biovol <- (chla_plot_57 / biovolume_plot_57) 
+
+count_plot_207 <- stacked_algae(station_id = "CW-207A", metric = "count", start_date = "2017-06-01", end_date = "2017-10-31") 
+biovolume_plot_207 <- stacked_algae(station_id = "CW-207A", metric = "biovolume", start_date = "2017-06-01", end_date = "2017-10-31")
+chla_plot_207 <- plot_chla("CW-207A", start_date = "2017-06-01", end_date = "2017-10-31")
+combined_207_count <- (chla_plot_207 / count_plot_207) 
+combined_207_biovol <- (chla_plot_207 / biovolume_plot_207) 
+
+count_plot_89 <- stacked_algae(station_id = "CL-089", metric = "count", start_date = "2017-06-01", end_date = "2017-10-31") 
+biovolume_plot_89 <- stacked_algae(station_id = "CL-089", metric = "biovolume", start_date = "2017-06-01", end_date = "2017-10-31")
+chla_plot_89 <- plot_chla("CL-089", start_date = "2017-06-01", end_date = "2017-10-31")
+combined_89_count <- (chla_plot_89 / count_plot_89) 
+combined_89_biovol <- (chla_plot_89 / biovolume_plot_89) 
+
+# Your existing code for creating plots
+
+# Print plots with captions
+print_with_caption(combined_16F_count, "Figure X: CW-016F (Fishing Creek Res.) Chlorophyll-a and Algae Count")
+print_with_caption(combined_16F_biovol, "Figure X: CW-016F  (Fishing Creek Res.) Chlorophyll-a and Algae Biovolume")
+print_with_caption(combined_57_count, "Figure X: CW-057  (Fishing Creek Res.) Chlorophyll-a and Algae Count")
+print_with_caption(combined_57_biovol, "Figure X: CW-057  (Fishing Creek Res.) Chlorophyll-a and Algae Biovolume")
+print_with_caption(combined_207_count, "Figure X: CW-207A (Lake Wateree) Chlorophyll-a and Algae Count")
+print_with_caption(combined_207_biovol, "Figure X: CW-207A (Lake Wateree) Chlorophyll-a and Algae Biovolume")
+print_with_caption(combined_89_count, "Figure X: CL-089 (Lake Wateree) Chlorophyll-a and Algae Count")
+print_with_caption(combined_89_biovol, "Figure X: CL-089 (Lake Wateree) Chlorophyll-a and Algae Biovolume")
+```
+
+## Cyanobacteria Counts and WHO Risk Thresholds
+
+These charts compare the 2017 cyanobacteria counts to WHO risk thresholds
+
+
+```{r, echo=FALSE, results = "asis", message = FALSE, warning = FALSE}
+cyano_16F <- cyano(station_id = "CW-016F", start_date = "2017-06-01", end_date = "2017-10-31")
+cyano_combined_16F <- (chla_plot_16F / cyano_16F)
+
+cyano_57 <- cyano(station_id = "CW-057", start_date = "2017-06-01", end_date = "2017-10-31")
+cyano_combined_57 <- (chla_plot_57 / cyano_57)
+
+cyano_207 <- cyano(station_id = "CW-207A", start_date = "2017-06-01", end_date = "2017-10-31")
+cyano_combined_207 <- (chla_plot_207 / cyano_207)
+
+cyano_89 <- cyano(station_id = "CL-089", start_date = "2017-06-01", end_date = "2017-10-31")
+cyano_combined_89 <- (chla_plot_89 / cyano_89)
+
+print_with_caption(cyano_combined_16F, "Figure X: Cyanobacteria counts at station CW-16F (Fishing Creek Reservoir).")
+print_with_caption(cyano_combined_57, "Figure X: Cyanobacteria counts at station CW-057 (Fishing Creek Reservoir).")
+print_with_caption(cyano_combined_207, "Figure X: Cyanobacteria counts at station CW-207A (Lake Wateree).")
+print_with_caption(cyano_combined_89, "Figure X: Cyanobacteria counts at station CL-089 (Lake Wateree).")
+```
+
+## Scatterplot of Cyanobacteria Counts vs. Chlorophyll-a
+
+These plots are intended to explore the relation between cyanobacteria cell counts
+and chlorophyll-a.
+
+```{r FC_version, echo=FALSE, results = "asis", message = FALSE, warning = FALSE, fig.cap = "Figure X: Cyanobacteria count vs. chla, Fishing Creek Reservoir"}
+chla_mean <- data_list$Chla %>%
+  filter(Waterbody == "FISHING CREEK RESERVOIR", Depth_m <= 1) %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(mean_Chla = mean(Chla, na.rm = TRUE)) %>%
+  ungroup()
+
+algal_summarized <- algal_taxa %>%
+  filter(Waterbody == "FISHING CREEK RESERVOIR", Algal_Group == "Cyanobacteria") %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(total_Cells = sum(Cells, na.rm = TRUE)) %>%
+  ungroup()
+
+merged_data <- inner_join(chla_mean, algal_summarized, 
+                          by = c("StationID", "ActivityStartDate"))
+
+ggplot(merged_data, aes(x = mean_Chla, y = total_Cells, color = StationID)) +
+  geom_point() +
+  geom_hline(yintercept = 20000, linetype = "dashed", color = "blue") +
+  geom_hline(yintercept = 100000, linetype = "dashed", color = "blue") +
+  annotate("text", x = max(merged_data$mean_Chla), y = 20000, 
+           label = "WHO moderate risk threshold", hjust = 1, vjust = -0.5, color = "blue") +
+  annotate("text", x = max(merged_data$mean_Chla), y = 100000, 
+           label = "WHO high risk treshold", hjust = 1, vjust = -0.5, color = "blue") +
+  labs(x = "Mean Chlorophyll-a", y = "Total Cyanobacteria Cells",
+       title = "Total Cyanobacteria Cells vs Mean Chlorophyll-a in Fishing Creek Reservoir",
+       color = "Station ID") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)
+```
+
+```{r LW_version, echo=FALSE, results = "asis", message = FALSE, warning = FALSE, fig.cap = "Figure X: Cyanobacteria count vs. chla, Lake Wateree"}
+chla_mean <- data_list$Chla %>%
+  filter(Waterbody == "LAKE WATEREE", Depth_m <= 1) %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(mean_Chla = mean(Chla, na.rm = TRUE)) %>%
+  ungroup()
+
+algal_summarized <- algal_taxa %>%
+  filter(Waterbody == "LAKE WATEREE", Algal_Group == "Cyanobacteria") %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(total_Cells = sum(Cells, na.rm = TRUE)) %>%
+  ungroup()
+
+merged_data <- inner_join(chla_mean, algal_summarized, 
+                          by = c("StationID", "ActivityStartDate"))
+
+ggplot(merged_data, aes(x = mean_Chla, y = total_Cells, color = StationID)) +
+  geom_point() +
+  geom_hline(yintercept = 20000, linetype = "dashed", color = "blue") +
+  geom_hline(yintercept = 100000, linetype = "dashed", color = "blue") +
+  annotate("text", x = max(merged_data$mean_Chla), y = 20000, 
+           label = "WHO moderate risk threshold", hjust = 1, vjust = -0.5, color = "blue") +
+  annotate("text", x = max(merged_data$mean_Chla), y = 100000, 
+           label = "WHO high risk threshold", hjust = 1, vjust = -0.5, color = "blue") +
+  labs(x = "Mean Chlorophyll-a", y = "Total Cyanobacteria Cells",
+       title = "Total Cyanobacteria Cells vs Mean Chlorophyll-a in Lake Wateree",
+       color = "Station ID") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)
+```
+
+# Percent Cynaobacteria Biovolume vs Chlorophyll-a
+
+These plots are intended to explore the relation between percent cyanobacteria
+biovolume and chlorophyll-a.
+
+
+```{r FC_version2, echo=FALSE, results = "asis", message = FALSE, warning = FALSE, fig.cap = "Figure X: Cyanobacteria biovolume vs. chla, Fishing Creek Reservoir"}
+
+chla_mean <- data_list$Chla %>%
+  filter(Waterbody == "FISHING CREEK RESERVOIR", Depth_m <= 1) %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(mean_Chla = mean(Chla, na.rm = TRUE)) %>%
+  ungroup()
+
+algal_summarized <- algal_taxa %>%
+  filter(Waterbody == "FISHING CREEK RESERVOIR", Algal_Group == "Cyanobacteria") %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(Sum_Percent_Biovol = sum(Perc_Biovol, na.rm = TRUE)) %>%
+  ungroup()
+
+merged_data <- inner_join(chla_mean, algal_summarized, 
+                          by = c("StationID", "ActivityStartDate"))
+
+ggplot(merged_data, aes(x = mean_Chla, y = Sum_Percent_Biovol, color = StationID)) +
+  geom_point() +
+  labs(x = "Mean Chlorophyll-a", y = "Percent Cyanobacteria Biovolume",
+       title = "Percent Cyanobacteria Biovolume vs Mean Chlorophyll-a in Fishing Creek Reservoir",
+       color = "Station ID") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)
+```
+
+```{r LW_version2, echo=FALSE, results = "asis", message = FALSE, warning = FALSE, fig.cap = "Figure X: Cyanobacteria biovolume vs. chla, Lake Wateree"}
+chla_mean <- data_list$Chla %>%
+  filter(Waterbody == "LAKE WATEREE", Depth_m <= 1) %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(mean_Chla = mean(Chla, na.rm = TRUE)) %>%
+  ungroup()
+
+algal_summarized <- algal_taxa %>%
+  filter(Waterbody == "LAKE WATEREE", Algal_Group == "Cyanobacteria") %>%
+  group_by(StationID, ActivityStartDate) %>%
+  summarize(Sum_Percent_Biovol = sum(Perc_Biovol, na.rm = TRUE)) %>%
+  ungroup()
+
+merged_data <- inner_join(chla_mean, algal_summarized, 
+                          by = c("StationID", "ActivityStartDate"))
+
+ggplot(merged_data, aes(x = mean_Chla, y = Sum_Percent_Biovol, color = StationID)) +
+  geom_point() +
+  labs(x = "Mean Chlorophyll-a", y = "Percent Cyanobacteria Biovolume",
+       title = "Percent Cyanobacteria Biovolume vs Mean Chlorophyll-a in Lake Wateree",
+       color = "Station ID") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::comma)
+```
+
+# Microcystin boxplots
+The charts demonstrate the great majority of the routine microcystin monitoring
+data are less than the most stringent drinking water threshold (0.3 ug/L) in all
+reservoirs. Obviously they are also much lower than the recreational threshold
+of 8 ug/L.
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in microcystin in Fishing Creek Reservoir."}
+boxplots1("Microcystin", "FISHING CREEK RESERVOIR", min_scale = 0, max_scale = 0.25)
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in microcystin in Cedar Creek Reservoir."}
+boxplots1("Microcystin", "CEDAR CREEK RESERVOIR", min_scale = 0, max_scale = 0.4)
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in microcystin in Lake Wateree."}
+boxplots1("Microcystin", "LAKE WATEREE", min_scale = 0, max_scale = 0.65)
+```

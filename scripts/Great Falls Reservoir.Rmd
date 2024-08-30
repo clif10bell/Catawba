@@ -1,0 +1,132 @@
+---
+title: "Great Falls Reservoir Data Analysis Sections to be Inserted in Catawba Chlorophyll-a Document"
+author: "Clifton Bell"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(ggplot2)
+library(data.table)
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(httr)
+library(flextable)
+library(jsonlite)
+library(readr)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(gridExtra)
+library(patchwork)
+library(officer)
+
+data_list <- readRDS(here("data", "data_list.rds"))
+algal_taxa <- readRDS(here("data", "algal_taxa.rds"))
+
+source(here("scripts", "data_import.R"))
+source(here("scripts", "boxplots.R"))
+source(here("scripts", "time_series.R"))
+source(here("scripts", "algal_taxa.R"))
+source(here("scripts", "scatterplots.R"))
+source(here("scripts", "exceed_tables.R"))
+source(here("scripts", "data_counts.R"))
+source(here("scripts", "annual_geomeans.R"))
+source(here("scripts", "summary_stat_tables.R"))
+source(here("scripts", "perc_vs_geomean.R"))
+```
+
+## 4.2   GREAT FALLS RESERVOIR
+
+Great Falls Reservoir is a ~213 acres water body downstream of Fishing Creek Lake. The reservoir consists up two parts: the Great Falls Reservoir proper upstream of the Great Falls Hydro Station, and the lower Great Falls Reservoir upstream of the Dearborn Hydro Station. Both hydro stations are operated by Duke Energy. Created in 1907, the Great Falls Reservoir is a relatively narrow water body and is the smallest of the four reservoirs addressed in this document. Among other recreational opportunities, Duke Energy schedules recreational flow releases for canoers/kayakers. No public water supply intakes are located on Great Falls Reservoir.
+
+### 4.2.1   Assessment History
+
+
+### 4.2.2   Chlorophyll-a Conditions
+
+There are relatively few chlorophyll-a data for Great Falls Reservoir, compared to the other three larger reservoirs addressed this report. Table X displays summary statistics for stations with at least 3 surface Apr-Oct samples collected since 2000. Station RL-06429 had the highest geometric mean (11.0 ug/L) and maximum (36.3 ug/L chlorophyll-a) values, albeit from only six samples collected in 2006. Most stations had geometric mean chlorophyll-a values less than 10 ug/L, which is not surprising for this run-of-the-river reservoir. There are insufficient data from individual stations to plot temporal or seasonal trends in chlorophyll-a in this reservoir.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("Chla", "GREAT FALLS RESERVOIR", threshold = 2)
+t1 <- set_caption(t1, caption = "Table X - Chlorophyll-a Summary Statistics for Great Falls Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+### 4.2.3   Water Quality Indicators
+
+Apart from chlorophyll-a, other important water quality indicators include dissolved oxygen (DO), pH, water clarity,
+and cyanotoxins. Exceedances of related criteria or thresholds might or might not be related to eutrophication or high chlorophyll-a values. However, these water quality indicators provide insights into the overall use status of a reservoir, and relations of these indicators with chlorophyll-a (or lack thereof) can inform site-specific chlorophyll-a criteria.
+
+#### 4.2.3.1    Dissolved Oxygen
+
+The applicable DO water quality criteria for Great Falls Reservoir include a daily average not less than 5.0 mg/L with a low of 4.0 mg/L. For water quality assessment purposes, measurements are made at the surface. Most stations in this water body had median DO concentrations of 6.5 - 7.0 mg/L and minimum DO concentrations greater than 4.0 mg/L. Only one station (RL-06429) had sufficient surface DO observations to calculate a 10th percentile DO (4.8 mg/L). Station RL-11117 had a minimum surface DO concentration of 2.9 mg/L.These stations are both in the Lower Great Falls Reservoirs, not far upstream of the Dearborn Hydro Station. Hence, the limited data available suggest that the DO is somewhat lower in the lower portion of Great Falls Reservoir (Figure X)
+
+There are insufficient subsurface DO measurements to determine if DO is highly stratified with depth in this reservoir. Similarly, there are few data with wich to explore the relation between chlorophyll-a and DO. The data that are available suggest a positive relation between the two parameters (Figure X), and also show that occasional low DO values were not associated with high chlorophyll-a values. 
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("DO", "GREAT FALLS RESERVOIR", threshold = 5)
+t1 <- set_caption(t1, caption = "Table X - Dissolved Oxygen Summary Statistics for Great Falls Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo=FALSE, fig.cap="Figure X - Spatial pattern in DO in Great Falls Reservoir. Apr-Oct data <= 1 m"}
+boxplots1("DO", "GREAT FALLS RESERVOIR", min_scale = 0, max_scale = 15)
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - Dissolved Oxygen v Chlorophyll-a at Selected Great Falls Reservoir stations."}
+scatter1("Chla", "DO", c("RL-05414", "RL-03332", "RL-03458", "RL-08062", "RL-13134", "RL-03351", "RL-06429", "RL-11117"), regression = "linear")
+```
+
+#### 4.2.3.2    pH
+
+The applicable water quality criterion for pH for SC freshwaters is a range between 6.0 and 8.5. Almost all pH measurements from Great Falls Reservoirs are within this range (Table X). The limited data available indicate a positive relation between pH and chlorophyll-a (Figure X). 
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("pH", "GREAT FALLS RESERVOIR", threshold = 2)
+t1 <- set_caption(t1, caption = "Table X - pH Summary Statistics for Great Falls Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+```{r, echo = FALSE, results = 'asis', fig.cap="Figure X - pH v Chlorophyll-a at Selected Great Falls Reservoir stations."}
+scatter1("Chla", "pH", c("RL-05414", "RL-03332", "RL-03458", "RL-08062", "RL-13134", "RL-03351", "RL-06429", "RL-11117"), regression = "linear")
+```
+
+#### 4.2.3.3    Water Clarity
+
+Water clarity in reservoirs is typically measured by Secchi depth. South Carolina does not have a recreationally-based criterion for Secchi depth. The few data available indicate that the mid-range Secchi depth values in Great Falls reservoir between 0.5 and 1.0 m. There were insufficient data to explore the relation between Secchi depth and chlorophyll-a, turbidity, or TSS. 
+
+There was no strong relation between Secchi depth and chlorophyll-a (R2 = 0.04) (Figure X). Secchi depth had a much stronger (inverse) relations with turbidity (Figure X) than with chlorophyll-a. Secchi depth was usually less than 0.5 m when turbidity exceeded 20 NTU.  There were insufficient TSS data from Cedar creek Reservoir to determine the relation between chlorophyll-a and TSS.
+
+```{r, echo = FALSE, results = 'asis'}
+t1 <- summary_table("Secchi", "GREAT FALLS RESERVOIR", threshold = 2)
+t1 <- set_caption(t1, caption = "Table X - Secchi Depth Summary Statistics for Great Falls Reservoir, Apr-Oct data <= 1 m")
+t1
+```
+
+#### 4.2.3.4    Cyanotoxins
+
+The SCDES database of routine and complaint driven cyanotoxin monitoring had no data for Great Falls Reservoir.
+
+#### 4.2.3.5    Other Algal Indicators
+
+The database provided to the project team included no algal taxonomy data for Great Falls reservoir.
+
+## 4.3 Other Status Indicators   
+
+The previous section explored water quality indicators and their relation with chlorophyll-a. Some indicators are less quantitative but still informative regarding the use status of the reservoir. This subsection discusses three such indicators: fishery quality, potable water supply, and aesthetics. 
+
+## 4.3.1    Fishery Quality
+
+## 4.3.2    Potable Water Supply
+
+Great Falls has no public water supply intakes, so there is no record of taste and odor or other water treatability issues for this reservoir.
+
+## 4.3.3    Reports of Algal Blooms 
+
+In addition to routine monitoring for microcystin, SCDES performs sampling associated with algal bloom complaints. The SCDES database of complaint driven cyanotoxin monitoring had no entries for Great Falls Reservoir.
